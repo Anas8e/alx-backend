@@ -12,6 +12,7 @@ class Server:
 
     def __init__(self):
         self.__dataset = None
+        self.__indexed_dataset = None
 
     def dataset(self) -> List[List]:
         """Cached dataset
@@ -27,9 +28,10 @@ class Server:
     def indexed_dataset(self) -> Dict[int, List]:
         """Dataset indexed by sorting position, starting at 0
         """
-        data = self.dataset()
-        indexed_data = {i: data[i] for i in range(len(data))}
-        return indexed_data
+        if self.__indexed_dataset is None:
+            data = self.dataset()
+            self.__indexed_dataset = {i: data[i] for i in range(len(data))}
+        return self.__indexed_dataset
 
     def get_hyper_index(self, index: int = None, page_size: int = 10) -> Dict:
         """Retrieves info about a page from a given index and with a
@@ -45,6 +47,8 @@ class Server:
             index = 0
 
         for i in range(index, len(data)):
+            if i not in data:
+                continue
             page_data.append(data[i])
             if len(page_data) == page_size:
                 next_index = i + 1
